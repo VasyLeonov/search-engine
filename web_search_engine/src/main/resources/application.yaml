@@ -1,0 +1,18 @@
+
+config:
+  adminLogin: admin
+  adminPassword: 500500
+  webInterface: /admin
+  prefix: web
+  sites:
+     -
+       url: http://www.playback.ru
+       name: PlayBack.ru
+     -
+       url: http://radiomv.ru
+       name: Radio MV
+     -
+       url: https://dimonvideo.ru
+       name: Dimon
+
+  userAgent: Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6
