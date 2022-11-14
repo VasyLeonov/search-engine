@@ -5,7 +5,7 @@ import com.example.web_search_engine.model.*;
 import com.example.web_search_engine.repositories.IndexRepository;
 import com.example.web_search_engine.services.IndexService;
 import com.example.web_search_engine.services.handlers.IndexHandler;
-import com.example.web_search_engine.services.handlers.RunIndexeng;
+import com.example.web_search_engine.services.handlers.RunIndexing;
 import com.example.web_search_engine.response.ResponseService;
 import com.example.web_search_engine.response.impl.ErrorResponse;
 import com.example.web_search_engine.response.impl.Response;
@@ -85,7 +85,7 @@ public class IndexServiceImpl implements IndexService {
             siteService.putSite(site);
         });
 
-        siteService.getAllSites().forEach(site -> executor.submit(new RunIndexeng(site, this)));
+        siteService.getAllSites().forEach(site -> executor.submit(new RunIndexing(site, this)));
         Response response = new Response();
         response.setResult(true);
         return response;
@@ -101,7 +101,7 @@ public class IndexServiceImpl implements IndexService {
         WebSite webSite = siteService.getWebSiteByUrl(url);
         if (webSite != null) {
             clearDataBaseBySite(webSite.getId());
-            executor.submit(new RunIndexeng(webSite, this));
+            executor.submit(new RunIndexing(webSite, this));
             Response response = new Response();
             response.setResult(true);
             return response;
@@ -115,7 +115,7 @@ public class IndexServiceImpl implements IndexService {
             return response;
         }
         siteService.putSite(site);
-        executor.submit(new RunIndexeng(site, this));
+        executor.submit(new RunIndexing(site, this));
         Response response = new Response();
         response.setResult(true);
         return response;
