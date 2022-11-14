@@ -23,6 +23,6 @@ public interface PageRepository extends JpaRepository<Page, Long> {
     void deleteAllBySiteId(@Param("siteId") Long siteId);
 
     @Modifying
-    @Query(value = "DELETE from `page` WHERE id = :pageId AND site_id = :siteId", nativeQuery = true)
+    @Query(value = "SELECT from `page` WHERE site_id = :siteId AND id = :pageId", nativeQuery = true)
     Optional<Page> getBySiteIdAndPageId(@Param("siteId") Long siteId, @Param("pageId") Long pageId);
 }

@@ -38,17 +38,14 @@ public class IndexHandler {
 
         List<Index> indexes = new ArrayList<>();
         List<Lemma> lemmaList = lemmaService.getAllLemmasBySiteId(webSite.getId());
-
         pages.forEach(page -> {
             String contTitle = lemmaService.titleHtml(page.getContent());
             String contBody = lemmaService.bodyHtml(page.getContent());
-
             lemmaFinder.getLemmaSet(contTitle.concat(contBody)).forEach(strLemma -> {
                 List<Lemma> lemmas = findLemmaInList(strLemma, lemmaList);
                 for (Lemma lemma : lemmas) {
                     int countLemmaTitle = countLemmaTitle(contTitle, strLemma);
                     int countLemmaBody = countLemmaBody(contBody, strLemma);
-                    if ((countLemmaBody + countLemmaTitle) == 0) continue;
                     Index index = new Index();
                     index.setPageId(page.getId());
                     index.setLemmaId(lemma.getId());
@@ -58,10 +55,10 @@ public class IndexHandler {
                 if(indexes.size() > MAX_INDEXES_IN_LIST) {
                     indexRepository.saveAll(indexes);
                     indexes.clear();
+                    webSite.setStatusTime(LocalDateTime.now());
+                    siteService.putSite(webSite);
                 }
             });
-            webSite.setStatusTime(LocalDateTime.now());
-            siteService.putSite(webSite);
         });
         indexRepository.saveAll(indexes);
     }

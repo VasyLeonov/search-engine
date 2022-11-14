@@ -55,7 +55,7 @@ public class SearchHandler {
         return lemmaList;
     }
 
-    public List<SearchData> searchData(String text) {
+    public List<SearchData> searchData(WebSite webSite, String text) {
 
         List<Lemma> lemmas = findLemmasFromRequest(text);
         Map<Page, Float> pages = new HashMap<>();
@@ -63,7 +63,8 @@ public class SearchHandler {
             Map<Page, Float> nextPages = new HashMap<>();
             List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
             indexes.forEach(index -> {
-                Optional<Page> page = pageService.getPageById(index.getPageId());
+                Optional<Page> page = webSite == null ? pageService.getPageById(index.getPageId()) :
+                        pageService.getPageBySiteAndIndex(webSite.getId(), index.getPageId());
                 page.ifPresent(value -> nextPages.put(value, index.getRank()));
             });
             if (pages.isEmpty()) {
@@ -78,11 +79,7 @@ public class SearchHandler {
             pages.clear();
             pages.putAll(interPages);
         }
-        if (!pages.isEmpty()) {
-           return createSearchData(pages, lemmas);
-        } else {
-           return new ArrayList<>();
-        }
+        return !pages.isEmpty() ? createSearchData(pages, lemmas) : new ArrayList<>();
     }
 
     public List<SearchData> createSearchData(Map<Page, Float> pages, List<Lemma> lemmas) {

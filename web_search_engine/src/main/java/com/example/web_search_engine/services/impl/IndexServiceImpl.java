@@ -51,15 +51,13 @@ public class IndexServiceImpl implements IndexService {
     public void indexingSite(WebSite site) {
 
         pageService.startCrawlSites(site, config.getUserAgent(), siteService);
-        synchronized (site.getId()) {
-            List<Field> fields = fieldService.putAndGetFields();
-            List<Page> pages = pageService.getPagesBySiteId(site.getId());
-            lemmaService.createLemmas(pages);
-            indexHandler.createIndexes(fields, pages, site);
-            site.setStatusTime(LocalDateTime.now());
-            site.setStatus(site.getStatus().equals(Status.FAILED) ? Status.FAILED : Status.INDEXED);
-            siteService.putSite(site);
-        }
+        List<Field> fields = fieldService.putAndGetFields();
+        List<Page> pages = pageService.getPagesBySiteId(site.getId());
+        lemmaService.createLemmas(pages);
+        indexHandler.createIndexes(fields, pages, site);
+        site.setStatusTime(LocalDateTime.now());
+        site.setStatus(site.getStatus().equals(Status.FAILED) ? Status.FAILED : Status.INDEXED);
+        siteService.putSite(site);
     }
 
     @Override
