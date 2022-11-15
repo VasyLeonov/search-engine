@@ -7,13 +7,11 @@ import com.example.web_search_engine.response.impl.ErrorResponse;
 import com.example.web_search_engine.response.impl.SearchResponse;
 import com.example.web_search_engine.services.SearchService;
 import com.example.web_search_engine.services.handlers.SearchHandler;
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 @Service
 public class SearchServiceImpl implements SearchService {
@@ -29,6 +27,7 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public ResponseService searchContent(String query, String site, int offset, int limit) {
+
         if (query.isEmpty()) {
             ErrorResponse response = new ErrorResponse();
             response.setResult(false);
@@ -54,5 +53,4 @@ public class SearchServiceImpl implements SearchService {
     public List<SearchData> sublistSearchData(List<SearchData> searches, int offset, int limit) {
         return searches.subList(0, Math.min(searches.size(), limit + offset));
     }
-
 }

@@ -11,6 +11,7 @@ import lombok.ToString;
 public class ErrorResponse implements ResponseService {
 
     private boolean result;
+
     private String error;
 
     @Override
