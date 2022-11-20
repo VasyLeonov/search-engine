@@ -28,27 +28,28 @@ public class LemmaServiceImpl implements LemmaService {
     @Override
     public void createLemmas(List<Page> pages) {
 
-        Set<Lemma> lemmaSet = new HashSet<>();
+        Set<Lemma> lemmas = new HashSet<>();
         pages.forEach(page -> {
             String textTitle = titleHtml(page.getContent());
             String textBody = bodyHtml(page.getContent());
-            List<String> list = new ArrayList<>(lemmaFinder.getLemmaSet(textTitle.concat(" ")
-                    .concat(textBody)));
-            list.forEach(lem -> {
+            Set<String> lemmasSet = lemmaFinder.getLemmaSet(textTitle.concat(" ")
+                    .concat(textBody));
+            lemmasSet.forEach(lem -> {
                 Lemma newLemma = new Lemma();
                 newLemma.setLemma(lem);
                 newLemma.setSiteId(page.getSiteId());
                 newLemma.setFrequency(1);
-                Lemma lemma = lemmaSet.stream().filter(l -> l.getLemma().equals(newLemma.getLemma()))
+                Lemma lemma = lemmas.stream().filter(l -> l.getLemma().equals(newLemma.getLemma()))
                         .findFirst().orElse(null);
                 if (lemma == null) {
-                    lemmaSet.add(newLemma);
+                    lemmas.add(newLemma);
                 } else {
                     lemma.setFrequency(lemma.getFrequency() + 1);
+                    lemmas.add(lemma);
                 }
             });
         });
-        lemmaRepository.saveAll(lemmaSet);
+        lemmaRepository.saveAll(lemmas);
     }
 
     public Long getCountBySiteId(Long siteId) {

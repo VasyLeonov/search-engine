@@ -4,16 +4,14 @@ import com.example.web_search_engine.model.*;
 import com.example.web_search_engine.repositories.IndexRepository;
 import com.example.web_search_engine.services.impl.LemmaServiceImpl;
 import com.example.web_search_engine.services.impl.SiteServiceImpl;
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class IndexHandler {
@@ -35,13 +33,13 @@ public class IndexHandler {
     }
 
     public void createIndexes(List<Field> fields, List<Page> pages, WebSite webSite) {
-
         List<Index> indexes = new ArrayList<>();
         List<Lemma> lemmaList = lemmaService.getAllLemmasBySiteId(webSite.getId());
+        HashMap<String, Lemma> lemmasMap = lemmasToMap(lemmaList);
         pages.forEach(page -> {
             String contTitle = lemmaService.titleHtml(page.getContent());
             String contBody = lemmaService.bodyHtml(page.getContent());
-            indexes.addAll(buildIndexes(fields, page, contTitle, contBody, lemmaList));
+            indexes.addAll(buildIndexes(fields, page, contTitle, contBody, lemmasMap));
             if(indexes.size() > MAX_INDEXES_IN_LIST) {
                 webSite.setStatusTime(LocalDateTime.now());
                 siteService.putSite(webSite);
@@ -52,13 +50,18 @@ public class IndexHandler {
         indexRepository.saveAll(indexes);
     }
 
-    public List<Index> buildIndexes(List<Field> fields, Page page, String contTitle, String contBody,
-                                    List<Lemma> lemmaList) {
+    public HashMap<String, Lemma> lemmasToMap(List<Lemma> lemmaList) {
+        HashMap<String, Lemma> lemmasMap = new HashMap<>();
+        lemmaList.forEach(lemma -> lemmasMap.put(lemma.getLemma(), lemma));
+        return lemmasMap;
+    }
 
+    public List<Index> buildIndexes(List<Field> fields, Page page, String contTitle, String contBody,
+                                    HashMap<String, Lemma> lemmasMap) {
         List<Index> indexes = new ArrayList<>();
         lemmaFinder.getLemmaSet(contTitle.concat(contBody)).forEach(strLemma -> {
-            List<Lemma> lemmas = findLemmaInList(strLemma, lemmaList);
-            for (Lemma lemma : lemmas) {
+            Lemma lemma = lemmasMap.get(strLemma);
+            if (lemma != null) {
                 int countLemmaTitle = countLemmaTitle(contTitle, strLemma);
                 int countLemmaBody = countLemmaBody(contBody, strLemma);
                 Index index = new Index();
@@ -79,12 +82,6 @@ public class IndexHandler {
     public int countLemmaBody(String contentBody, String strLemma) {
         return lemmaFinder.collectLemmas(contentBody).get(strLemma) == null ? 0
                 : lemmaFinder.collectLemmas(contentBody).get(strLemma);
-    }
-
-    public List<Lemma> findLemmaInList(String search, List<Lemma> list) {
-        Iterable<Lemma> result = list.stream().filter(s -> Objects.equals(s.getLemma(), search))
-                .collect(Collectors.toList());
-        return Lists.newArrayList(result.iterator());
     }
 
     public float calculateRank(List<Field> fields, int titleLemmaCount, int bodyLemmaCount) {

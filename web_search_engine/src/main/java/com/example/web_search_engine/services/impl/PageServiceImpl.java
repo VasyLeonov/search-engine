@@ -40,15 +40,15 @@ public class PageServiceImpl implements PageService {
         return pageRepository.findPagesBySiteId(siteId);
     }
 
-    public Optional<Page> getPageById(long pageId) {
-        return Optional.of(pageRepository.getById(pageId));
+    public Page getPageById(long pageId) {
+        return pageRepository.getById(pageId);
     }
 
     public void deletePagesBySiteId(Long siteId) {
         pageRepository.deleteAllBySiteId(siteId);
     }
 
-    public Optional<Page> getPageBySiteAndIndex(Long siteId, Long pageId) {
+    public Page getPageBySiteAndIndex(Long siteId, Long pageId) {
         return pageRepository.getBySiteIdAndPageId(siteId, pageId);
     }
 }

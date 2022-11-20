@@ -12,7 +12,6 @@ import com.example.web_search_engine.services.impl.SiteServiceImpl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class SearchHandler {
     private final SiteServiceImpl siteService;
 
     @Autowired
-    public SearchHandler(@Lazy LemmaServiceImpl lemmaService,
+    public SearchHandler(LemmaServiceImpl lemmaService,
                          IndexServiceImpl indexService,
                          PageServiceImpl pageService,
                          SiteServiceImpl siteService) throws IOException {
@@ -44,7 +43,6 @@ public class SearchHandler {
     }
 
     public List<Lemma> findLemmasFromRequest(String text) {
-
         List<Lemma> lemmaList = new ArrayList<>();
         Set<String> strings = lemmaFinder.getLemmaSet(text);
         strings.forEach(lem -> {
@@ -56,26 +54,22 @@ public class SearchHandler {
     }
 
     public List<SearchData> searchData(WebSite webSite, String text) {
-
         List<Lemma> lemmas = findLemmasFromRequest(text);
         Map<Page, Float> pages = new HashMap<>();
         for (Lemma lemma : lemmas) {
             Map<Page, Float> nextPages = new HashMap<>();
             List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
             indexes.forEach(index -> {
-                Optional<Page> page = webSite == null ? pageService.getPageById(index.getPageId()) :
+                Page page = webSite == null ? pageService.getPageById(index.getPageId()) :
                         pageService.getPageBySiteAndIndex(webSite.getId(), index.getPageId());
-                page.ifPresent(value -> nextPages.put(value, index.getRank()));
+                nextPages.put(page, index.getRank());
             });
             if (pages.isEmpty()) {
                 pages.putAll(nextPages);
             }
             Map<Page, Float> interPages = new HashMap<>();
-            nextPages.forEach((key, value) -> {
-                if (pages.containsKey(key)) {
-                    interPages.put(key, pages.get(key) + value);
-                }
-            });
+            nextPages.forEach((key, value) -> interPages.put(key, pages.get(key) != null ?
+                    pages.get(key) + value : value));
             pages.clear();
             pages.putAll(interPages);
         }
@@ -83,22 +77,18 @@ public class SearchHandler {
     }
 
     public List<SearchData> createSearchData(Map<Page, Float> pages, List<Lemma> lemmas) {
-
         List<SearchData> result = new ArrayList<>();
         calculateRelevance(pages).forEach((key, value) -> {
             String snippet = buildSnippet(key.getContent(), lemmas);
-            if (!snippet.isEmpty()) {
-                WebSite site = siteService.getSiteById(key.getSiteId());
-                result.add(new SearchData(site.getUrl(), site.getName(), key.getPath(),
-                        Jsoup.parse(key.getContent()).title(),
-                        snippet, value));
-            }
+            WebSite site = siteService.getSiteById(key.getSiteId());
+            result.add(new SearchData(site.getUrl(), site.getName(), key.getPath(),
+                    Jsoup.parse(key.getContent()).title(),
+                    snippet, value));
         });
         return result;
     }
 
     public String buildSnippet(String html, List <Lemma> lemmas) {
-
         StringBuilder builder = new StringBuilder();
         StringBuilder buildSnippet = new StringBuilder();
         Document document = Jsoup.parse(html);
@@ -116,7 +106,6 @@ public class SearchHandler {
     }
 
     public String substringSearch(String str, List <Lemma> lemmas) {
-
         String text = "";
         for (Lemma lemma : lemmas) {
             String strLemma = lemma.getLemma();
@@ -147,7 +136,6 @@ public class SearchHandler {
     }
 
     public Map<Page, Float> calculateRelevance(Map<Page, Float> pages) {
-
         float maxValue = Collections.max(pages.entrySet(),
                 Comparator.comparingDouble(Map.Entry::getValue)).getValue();
         pages.forEach((key, value) -> pages.remove(key, value / maxValue));
@@ -155,7 +143,6 @@ public class SearchHandler {
     }
 
     public <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map ) {
-
         Map<K,V> result = new LinkedHashMap<>();
         Stream<Map.Entry<K,V>> stream = map.entrySet().stream();
         stream.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))

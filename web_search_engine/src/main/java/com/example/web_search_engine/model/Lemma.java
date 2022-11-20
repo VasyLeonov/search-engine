@@ -6,9 +6,7 @@ import javax.persistence.*;
 import javax.persistence.Index;
 
 @Entity
-@Table(name = "lemma", indexes = {
-        @Index(name = "idx_lemma_lemma", columnList = "lemma"),
-        @Index(name = "idx_lemma_site_id", columnList = "site_id")
+@Table(name = "lemma", indexes = {@Index(name = "idx_lemma_site_id", columnList = "site_id")
 })
 @Getter
 @Setter

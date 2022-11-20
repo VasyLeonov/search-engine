@@ -22,8 +22,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = "com.example.web_search_engine.repositories")
 public class DbConfig {
 
+    private final Environment environment;
+
     @Autowired
-    private Environment environment;
+    public DbConfig(Environment environment) {
+        this.environment = environment;
+    }
 
     @Bean
     public DataSource dataSource() {

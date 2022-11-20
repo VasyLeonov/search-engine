@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PageRepository extends JpaRepository<Page, Long> {
@@ -24,5 +23,5 @@ public interface PageRepository extends JpaRepository<Page, Long> {
 
     @Modifying
     @Query(value = "SELECT from `page` WHERE site_id = :siteId AND id = :pageId", nativeQuery = true)
-    Optional<Page> getBySiteIdAndPageId(@Param("siteId") Long siteId, @Param("pageId") Long pageId);
+    Page getBySiteIdAndPageId(@Param("siteId") Long siteId, @Param("pageId") Long pageId);
 }
