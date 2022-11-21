@@ -184,6 +184,10 @@ public class IndexServiceImpl implements IndexService {
         return isAlive;
     }
 
+    public Long countIndexes() {
+        return indexRepository.count();
+    }
+
     public List<Index> getIndexesByLemmaId(long lemmaId) {
         return indexRepository.findIndexByLemmaId(lemmaId);
     }
