@@ -52,6 +52,10 @@ public class LemmaServiceImpl implements LemmaService {
         lemmaRepository.saveAll(lemmas);
     }
 
+    public Lemma putLemma(Lemma lemma) {
+        return lemmaRepository.save(lemma);
+    }
+
     public Long getCountBySiteId(Long siteId) {
         return lemmaRepository.findLemmaCountBySiteId(siteId);
     }
