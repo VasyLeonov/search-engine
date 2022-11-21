@@ -112,4 +112,24 @@ class IndexHandlerTest {
         int actual = Math.toIntExact(indexService.countIndexes());
         Assert.assertEquals(expected, actual);
     }
+
+    @Test
+    void calculateRank() {
+        float actual1 = indexHandler.calculateRank(fields, 0, 4);
+        float expected1 = 3.2f;
+
+        float actual2 = indexHandler.calculateRank(fields, 1, 4);
+        float expected2 = 4.2f;
+
+        float actual3 = indexHandler.calculateRank(fields, 5, 0);
+        float expected3 = 5f;
+
+        float actual4 = indexHandler.calculateRank(fields, 0, 0);
+        float expected4 = 0f;
+
+        Assert.assertEquals(expected1, actual1, expected1);
+        Assert.assertEquals(expected2, actual2, expected2);
+        Assert.assertEquals(expected3, actual3, expected3);
+        Assert.assertEquals(expected4, actual4, expected4);
+    }
 }
