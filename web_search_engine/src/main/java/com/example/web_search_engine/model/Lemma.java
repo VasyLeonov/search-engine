@@ -11,6 +11,7 @@ import javax.persistence.Index;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class Lemma {
 
     @Id

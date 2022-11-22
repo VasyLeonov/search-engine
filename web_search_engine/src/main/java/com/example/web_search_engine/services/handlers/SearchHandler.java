@@ -99,6 +99,7 @@ public class SearchHandler {
         int start = iterator.first();
         for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
              String str = builder.substring(start, end);
+             if (substringSearch(str, lemmas).isEmpty()) continue;
              buildSnippet.append(substringSearch(str, lemmas));
         }
         return buildSnippet.length() > 450 ? buildSnippet.substring(0, 450).concat("...")
@@ -106,8 +107,9 @@ public class SearchHandler {
     }
 
     public String substringSearch(String str, List <Lemma> lemmas) {
-        String text = "";
+        StringBuilder result = new StringBuilder();
         for (Lemma lemma : lemmas) {
+            String text = "";
             String strLemma = lemma.getLemma();
             if (str.toLowerCase(Locale.ROOT).contains(strLemma)) {
                 String replacement = "<b>".concat(strLemma).concat("</b>");
@@ -116,23 +118,20 @@ public class SearchHandler {
                          Pattern.UNICODE_CASE).matcher(str)
                          .replaceAll(Matcher.quoteReplacement(replacement));
             }
-        }
-        int lastIndex = text.indexOf("<b>");
-        int nextIndex = text.indexOf("</b>");
-        if ((text.length() - nextIndex) > 50) {
-            text = text.substring(0, nextIndex + 50).concat("...");
-        }
-        if (lastIndex > 50) {
-           text = text.substring(lastIndex - 50);
-            for (char ch : text.toCharArray()) {
-                if (Character.isUpperCase(ch)) {
-                   int index = text.indexOf(ch);
-                   text = text.substring(index);
-                   break;
-                }
+            int lastIndex = text.indexOf("<b>");
+            int nextIndex = text.indexOf("</b>");
+            if ((text.length() - nextIndex) > 50) {
+                text = text.substring(0, nextIndex + 50).concat("...");
+            }
+            if (lastIndex > 50) {
+                text = text.substring(lastIndex - 50);
+                text = text.substring(text.indexOf(" "));
+            }
+            if (!text.isEmpty()) {
+                result.append(text.concat(" "));
             }
         }
-        return text;
+        return result.toString();
     }
 
     public Map<Page, Float> calculateRelevance(Map<Page, Float> pages) {
