@@ -37,11 +37,8 @@ public class FieldServiceImpl implements FieldService {
             fieldBody.setSelector("body");
             fieldBody.setWeight(0.8F);
 
-            fieldRepository.saveAndFlush(fieldTitle);
-            fieldRepository.saveAndFlush(fieldBody);
-
-            fields.add(fieldTitle);
-            fields.add(fieldBody);
+            fields.add(fieldRepository.saveAndFlush(fieldTitle));
+            fields.add(fieldRepository.saveAndFlush(fieldBody));
         }
         return new ArrayList<>(fields);
     }
