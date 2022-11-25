@@ -10,7 +10,6 @@ import com.example.web_search_engine.services.impl.LemmaServiceImpl;
 import com.example.web_search_engine.services.impl.PageServiceImpl;
 import com.example.web_search_engine.services.impl.SiteServiceImpl;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +45,7 @@ public class SearchHandler {
         List<Lemma> lemmaList = new ArrayList<>();
         Set<String> strings = lemmaFinder.getLemmaSet(text);
         strings.forEach(lem -> {
-            List<Lemma> lemmas = lemmaService.findLemmasByLemma(lem);
+            List<Lemma> lemmas = lemmaService.getLemmasByLemma(lem);
             lemmaList.addAll(lemmas);
         });
         lemmaList.sort(Comparator.comparing(Lemma::getFrequency));
@@ -70,13 +69,12 @@ public class SearchHandler {
             Map<Page, Float> interPages = new HashMap<>();
             nextPages.forEach((key, value) -> interPages.put(key, pages.get(key) != null ?
                     pages.get(key) + value : value));
-            pages.clear();
             pages.putAll(interPages);
         }
         return !pages.isEmpty() ? createSearchData(pages, lemmas) : new ArrayList<>();
     }
 
-    public List<SearchData> createSearchData(Map<Page, Float> pages, List<Lemma> lemmas) {
+    private List<SearchData> createSearchData(Map<Page, Float> pages, List<Lemma> lemmas) {
         List<SearchData> result = new ArrayList<>();
         calculateRelevance(pages).forEach((key, value) -> {
             String snippet = buildSnippet(key.getContent(), lemmas);
@@ -91,15 +89,14 @@ public class SearchHandler {
     public String buildSnippet(String html, List <Lemma> lemmas) {
         StringBuilder builder = new StringBuilder();
         StringBuilder buildSnippet = new StringBuilder();
-        Document document = Jsoup.parse(html);
-        builder.append(document.text());
 
+        builder.append(Jsoup.parse(html).text());
         BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.ROOT);
         iterator.setText(builder.toString());
         int start = iterator.first();
+
         for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
              String str = builder.substring(start, end);
-             if (substringSearch(str, lemmas).isEmpty()) continue;
              buildSnippet.append(substringSearch(str, lemmas));
         }
         return buildSnippet.length() > 450 ? buildSnippet.substring(0, 450).concat("...")
@@ -109,27 +106,26 @@ public class SearchHandler {
     public String substringSearch(String str, List <Lemma> lemmas) {
         StringBuilder result = new StringBuilder();
         for (Lemma lemma : lemmas) {
-            String text = "";
+            StringBuilder text = new StringBuilder();
             String strLemma = lemma.getLemma();
             if (str.toLowerCase(Locale.ROOT).contains(strLemma)) {
                 String replacement = "<b>".concat(strLemma).concat("</b>");
-                text = Pattern.compile(strLemma, Pattern.LITERAL |
+                text.append(Pattern.compile(strLemma, Pattern.LITERAL |
                          Pattern.CASE_INSENSITIVE |
                          Pattern.UNICODE_CASE).matcher(str)
-                         .replaceAll(Matcher.quoteReplacement(replacement));
+                         .replaceAll(Matcher.quoteReplacement(replacement)));
             }
             int lastIndex = text.indexOf("<b>");
             int nextIndex = text.indexOf("</b>");
             if ((text.length() - nextIndex) > 50) {
-                text = text.substring(0, nextIndex + 50).concat("...");
+                text.delete(nextIndex + 50, text.length() - 1);
+                text.append("...");
             }
             if (lastIndex > 50) {
-                text = text.substring(lastIndex - 50);
-                text = text.substring(text.indexOf(" "));
+                text.delete(0, lastIndex - 50);
+                text.delete(0, text.indexOf(" "));
             }
-            if (!text.isEmpty()) {
-                result.append(text.concat(" "));
-            }
+            result.append(text.append(" "));
         }
         return result.toString();
     }

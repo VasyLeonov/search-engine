@@ -20,6 +20,5 @@ public interface LemmaRepository extends JpaRepository<Lemma, Long> {
     @Query(value = "DELETE from `lemma` WHERE site_id = :siteId", nativeQuery = true)
     void deleteAllBySiteId(@Param("siteId") Long siteId);
 
-    @Query(value = "SELECT * FROM `lemma` WHERE lemma = :lem", nativeQuery = true)
-    List<Lemma> findLemmasByLemma(@Param("lem") String lem);
+    List<Lemma> findByLemma(String lem);
 }

@@ -72,8 +72,8 @@ public class LemmaServiceImpl implements LemmaService {
         return Jsoup.parse(html).title();
     }
 
-    public List<Lemma> findLemmasByLemma(String lemma) {
-        return lemmaRepository.findLemmasByLemma(lemma);
+    public List<Lemma> getLemmasByLemma(String lemma) {
+        return lemmaRepository.findByLemma(lemma);
     }
 
     public List<Lemma> getAllLemmasBySiteId(Long siteId) {
