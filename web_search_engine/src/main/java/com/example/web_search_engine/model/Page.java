@@ -1,5 +1,6 @@
 package com.example.web_search_engine.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,6 +16,7 @@ import javax.persistence.Index;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class Page implements Comparable<Page> {
 
     @Id

@@ -54,6 +54,7 @@ public class SearchHandler {
 
     public List<SearchData> searchData(WebSite webSite, String text) {
         List<Lemma> lemmas = findLemmasFromRequest(text);
+        Map<Page, Float> interPages = new HashMap<>();
         Map<Page, Float> pages = new HashMap<>();
         for (Lemma lemma : lemmas) {
             Map<Page, Float> nextPages = new HashMap<>();
@@ -66,11 +67,14 @@ public class SearchHandler {
             if (pages.isEmpty()) {
                 pages.putAll(nextPages);
             }
-            Map<Page, Float> interPages = new HashMap<>();
-            nextPages.forEach((key, value) -> interPages.put(key, pages.get(key) != null ?
-                    pages.get(key) + value : value));
-            pages.putAll(interPages);
+            nextPages.forEach((key, value) -> {
+                if (pages.containsKey(key)) {
+                    interPages.put(key, pages.get(key) + value);
+                }
+            });
         }
+        pages.clear();
+        pages.putAll(interPages);
         return !pages.isEmpty() ? createSearchData(pages, lemmas) : new ArrayList<>();
     }
 
