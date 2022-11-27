@@ -2,6 +2,7 @@ package com.example.web_search_engine.services.handlers;
 
 import com.example.web_search_engine.model.Lemma;
 import com.example.web_search_engine.services.impl.LemmaServiceImpl;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class SearchHandlerTest {
             "существующих финансовых и административных условий";
 
     private static final String[] ARRAY_LEMMAS = {"количественный", "рост", "наш", "активность",
-            "административный, образ", "постоянный", "способствовать", "сфера", "нашить", "существовать",
+            "административный", "образ", "постоянный", "способствовать", "сфера", "нашить", "существовать",
             "повышение", "финансовый", "условие", "равный", "актуальность", "существующий"};
 
 
@@ -61,7 +62,7 @@ class SearchHandlerTest {
     @Test
     void findLemmasFromRequest() {
         List<Lemma> actual = searchHandler.findLemmasFromRequest(TEXT);
-        Assertions.assertArrayEquals(expectedLemmas.toArray(), actual.toArray());
+        Assert.assertArrayEquals(expectedLemmas.toArray(), actual.toArray());
     }
 
     @Test
