@@ -51,6 +51,6 @@ public class SearchServiceImpl implements SearchService {
     }
 
     public List<SearchData> sublistSearchData(List<SearchData> searches, int offset, int limit) {
-        return searches.subList(0, Math.min(searches.size(), limit + offset));
+        return searches.subList(offset, Math.min(searches.size(), limit + offset));
     }
 }

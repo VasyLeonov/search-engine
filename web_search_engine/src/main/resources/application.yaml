@@ -36,6 +36,15 @@
        name: Radio MV
      -
        url: https://dimonvideo.ru
-       name: Dimon
+       name: Димон
+     -
+       url: https://ipfran.ru/
+       name: Федеральный исследовательский центр
+     -
+       url: https://nikoartgallery.com/
+       name: Nico
+     -
+       url: https://www.svetlovka.ru/
+       name: Светловка
 
     userAgent: Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6

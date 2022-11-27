@@ -65,7 +65,6 @@ public class StatisticServiceImpl implements StatisticService {
         StatisticResponse response = new StatisticResponse();
         response.setStatistics(statistic);
         response.setResult(true);
-        System.out.println(response);
         return response;
     }
 }
