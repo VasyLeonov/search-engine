@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface IndexRepository extends JpaRepository<Index, Long> {
 
-    @Query(value = "SELECT * FROM `index` WHERE lemma_id = :lemmaId LIMIT 100", nativeQuery = true)
+    @Query(value = "SELECT * FROM `index` WHERE lemma_id = :lemmaId", nativeQuery = true)
     List<Index> findIndexByLemmaId(@Param("lemmaId") long lemmaId);
 
     @Modifying

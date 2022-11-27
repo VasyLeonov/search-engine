@@ -21,7 +21,7 @@ public class SearchController {
     @GetMapping("/search")
     public ResponseEntity<Object> search(
             @RequestParam(name="query", required=false, defaultValue="") String query,
-            @RequestParam(name="limit", required=false, defaultValue="") String site,
+            @RequestParam(name="site", required=false, defaultValue="") String site,
             @RequestParam(name="offset", required=false, defaultValue="") int offset,
             @RequestParam(name="limit", required=false, defaultValue="") int limit
     ) {

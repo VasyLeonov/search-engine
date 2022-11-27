@@ -47,8 +47,4 @@ public class PageServiceImpl implements PageService {
     public void deletePagesBySiteId(Long siteId) {
         pageRepository.deleteAllBySiteId(siteId);
     }
-
-    public Page getPageBySiteAndIndex(Long siteId, Long pageId) {
-        return pageRepository.getBySiteIdAndPageId(siteId, pageId);
-    }
 }

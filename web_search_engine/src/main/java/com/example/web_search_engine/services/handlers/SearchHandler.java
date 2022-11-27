@@ -60,8 +60,8 @@ public class SearchHandler {
             Map<Page, Float> nextPages = new HashMap<>();
             List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
             indexes.forEach(index -> {
-                Page page = webSite == null ? pageService.getPageById(index.getPageId()) :
-                        pageService.getPageBySiteAndIndex(webSite.getId(), index.getPageId());
+                Page page = pageService.getPageById(index.getPageId());
+                if(webSite != null && !Objects.equals(page.getSiteId(), webSite.getId())) return;
                 nextPages.put(page, index.getRank());
             });
             if (pages.isEmpty()) {

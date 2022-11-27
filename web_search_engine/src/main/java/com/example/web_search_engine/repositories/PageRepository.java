@@ -20,8 +20,4 @@ public interface PageRepository extends JpaRepository<Page, Long> {
     @Modifying
     @Query(value = "DELETE from `page` WHERE site_id = :siteId", nativeQuery = true)
     void deleteAllBySiteId(@Param("siteId") Long siteId);
-
-    @Modifying
-    @Query(value = "SELECT from `page` WHERE site_id = :siteId AND id = :pageId", nativeQuery = true)
-    Page getBySiteIdAndPageId(@Param("siteId") Long siteId, @Param("pageId") Long pageId);
 }
