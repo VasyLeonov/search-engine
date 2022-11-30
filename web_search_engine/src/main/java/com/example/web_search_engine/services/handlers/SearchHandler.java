@@ -18,6 +18,7 @@ import java.text.BreakIterator;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -41,11 +42,17 @@ public class SearchHandler {
         this.siteService = siteService;
     }
 
-    public List<Lemma> findLemmasFromRequest(String text) {
+    public List<Lemma> findLemmasFromRequest(String text, WebSite webSite) {
         List<Lemma> lemmaList = new ArrayList<>();
         Set<String> strings = lemmaFinder.getLemmaSet(text);
         strings.forEach(lem -> {
             List<Lemma> lemmas = lemmaService.getLemmasByLemma(lem);
+            if (webSite != null) {
+                lemmaList.addAll(lemmas.stream().filter(l ->
+                        Objects.equals(l.getSiteId(),
+                        webSite.getId())).collect(Collectors.toList()));
+                return;
+            }
             lemmaList.addAll(lemmas);
         });
         lemmaList.sort(Comparator.comparing(Lemma::getFrequency));
@@ -53,7 +60,7 @@ public class SearchHandler {
     }
 
     public List<SearchData> searchData(WebSite webSite, String text) {
-        List<Lemma> lemmas = findLemmasFromRequest(text);
+        List<Lemma> lemmas = findLemmasFromRequest(text, webSite);
         Map<Page, Float> interPages = new HashMap<>();
         Map<Page, Float> pages = new HashMap<>();
         for (Lemma lemma : lemmas) {
@@ -61,7 +68,6 @@ public class SearchHandler {
             List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
             indexes.forEach(index -> {
                 Page page = pageService.getPageById(index.getPageId());
-                if(webSite != null && !Objects.equals(page.getSiteId(), webSite.getId())) return;
                 nextPages.put(page, index.getRank());
             });
             if (pages.isEmpty()) {
@@ -72,9 +78,9 @@ public class SearchHandler {
                     interPages.put(key, pages.get(key) + value);
                 }
             });
+            pages.clear();
+            pages.putAll(interPages);
         }
-        pages.clear();
-        pages.putAll(interPages);
         return !pages.isEmpty() ? createSearchData(pages, lemmas) : new ArrayList<>();
     }
 
@@ -137,7 +143,7 @@ public class SearchHandler {
     public Map<Page, Float> calculateRelevance(Map<Page, Float> pages) {
         float maxValue = Collections.max(pages.entrySet(),
                 Comparator.comparingDouble(Map.Entry::getValue)).getValue();
-        pages.forEach((key, value) -> pages.remove(key, value / maxValue));
+        pages.forEach((key, value) -> pages.put(key, value / maxValue));
         return sortByValue(pages);
     }
 

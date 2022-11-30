@@ -1,6 +1,7 @@
 package com.example.web_search_engine.services.handlers;
 
 import com.example.web_search_engine.model.Lemma;
+import com.example.web_search_engine.model.WebSite;
 import com.example.web_search_engine.services.impl.LemmaServiceImpl;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +30,8 @@ class SearchHandlerTest {
 
     private List<Lemma> expectedLemmas;
 
+    private WebSite webSite;
+
 
     private static final String TEXT = "Равным образом постоянный " +
             "количественный рост активности и сфера нашей " +
@@ -49,6 +52,7 @@ class SearchHandlerTest {
 
     @BeforeEach
     public void setUp() {
+        webSite = null;
         expectedLemmas = new ArrayList<>();
         for (String str : ARRAY_LEMMAS) {
             Lemma lemma = new Lemma();
@@ -61,7 +65,7 @@ class SearchHandlerTest {
 
     @Test
     void findLemmasFromRequest() {
-        List<Lemma> actual = searchHandler.findLemmasFromRequest(TEXT);
+        List<Lemma> actual = searchHandler.findLemmasFromRequest(TEXT, webSite);
         Assert.assertArrayEquals(expectedLemmas.toArray(), actual.toArray());
     }
 
