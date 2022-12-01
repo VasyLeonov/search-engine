@@ -61,27 +61,23 @@ public class SearchHandler {
 
     public List<SearchData> searchData(WebSite webSite, String text) {
         List<Lemma> lemmas = findLemmasFromRequest(text, webSite);
-        Map<Page, Float> interPages = new HashMap<>();
-        Map<Page, Float> pages = new HashMap<>();
+        Map<Page, Float> resultPages = new HashMap<>();
+        Map<Long, Map<Page, Float>> mapPages = new HashMap<>();
         for (Lemma lemma : lemmas) {
-            Map<Page, Float> nextPages = new HashMap<>();
             List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
-            indexes.forEach(index -> {
-                Page page = pageService.getPageById(index.getPageId());
-                nextPages.put(page, index.getRank());
-            });
-            if (pages.isEmpty()) {
-                pages.putAll(nextPages);
+            if (mapPages.isEmpty()) {
+                indexes.forEach(index -> {
+                    Page page = pageService.getPageById(index.getPageId());
+                    mapPages.put(index.getPageId(), Map.of(page, index.getRank()));
+                });
             }
-            nextPages.forEach((key, value) -> {
-                if (pages.containsKey(key)) {
-                    interPages.put(key, pages.get(key) + value);
+            indexes.forEach(index -> {
+                if (mapPages.containsKey(index.getPageId())) {
+                    resultPages.putAll(mapPages.get(index.getPageId()));
                 }
             });
-            pages.clear();
-            pages.putAll(interPages);
         }
-        return !pages.isEmpty() ? createSearchData(pages, lemmas) : new ArrayList<>();
+        return !resultPages.isEmpty() ? createSearchData(resultPages, lemmas) : new ArrayList<>();
     }
 
     private List<SearchData> createSearchData(Map<Page, Float> pages, List<Lemma> lemmas) {
@@ -99,7 +95,6 @@ public class SearchHandler {
     public String buildSnippet(String html, List <Lemma> lemmas) {
         StringBuilder builder = new StringBuilder();
         StringBuilder buildSnippet = new StringBuilder();
-
         builder.append(Jsoup.parse(html).text());
         BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.ROOT);
         iterator.setText(builder.toString());
@@ -109,7 +104,7 @@ public class SearchHandler {
              String str = builder.substring(start, end);
              buildSnippet.append(substringSearch(str, lemmas));
         }
-        return buildSnippet.length() > 450 ? buildSnippet.substring(0, 450).concat("...")
+        return buildSnippet.length() > 550 ? buildSnippet.substring(0, 550).concat("...")
                 : buildSnippet.toString();
     }
 
@@ -131,9 +126,8 @@ public class SearchHandler {
                 text.delete(nextIndex + 50, text.length() - 1);
                 text.append("...");
             }
-            if (lastIndex > 50) {
-                text.delete(0, lastIndex - 50);
-                text.delete(0, text.indexOf(" "));
+            if (lastIndex > 60) {
+                text.delete(0, lastIndex);
             }
             result.append(text.append(" "));
         }
