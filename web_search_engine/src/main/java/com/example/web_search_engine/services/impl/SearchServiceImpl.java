@@ -35,7 +35,7 @@ public class SearchServiceImpl implements SearchService {
             return response;
         }
         WebSite webSite = siteService.getWebSiteByUrl(site);
-        List<SearchData> searches = searchHandler.searchData(webSite, query);
+        List<SearchData> searches = searchHandler.searchData(webSite, query, offset, limit);
 
         if (searches.isEmpty()) {
             ErrorResponse response = new ErrorResponse();
@@ -45,12 +45,8 @@ public class SearchServiceImpl implements SearchService {
         }
         SearchResponse response = new SearchResponse();
         response.setResult(true);
-        response.setCount(searches.size());
-        response.setData(sublistSearchData(searches, offset, limit));
+        response.setCount(searchHandler.getSearchCount());
+        response.setData(searches);
         return response;
-    }
-
-    public List<SearchData> sublistSearchData(List<SearchData> searches, int offset, int limit) {
-        return searches.subList(offset, Math.min(searches.size(), limit + offset));
     }
 }

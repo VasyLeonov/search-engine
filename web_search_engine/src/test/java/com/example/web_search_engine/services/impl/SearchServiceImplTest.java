@@ -52,6 +52,6 @@ class SearchServiceImplTest {
         ResponseService actualTwo = searchService.searchContent("", "SITE_URL", 0, 20);
         Assert.assertEquals(expectedOne, actualOne);
         Assert.assertEquals(expectedTwo, actualTwo);
-        Mockito.verify(searchHandler, Mockito.times(1)).searchData(null, QUERY);
+        Mockito.verify(searchHandler, Mockito.times(1)).searchData(null, QUERY, 0, 0);
     }
 }

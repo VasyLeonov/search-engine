@@ -29,6 +29,7 @@ public class SearchHandler {
     private final IndexServiceImpl indexService;
     private final PageServiceImpl pageService;
     private final SiteServiceImpl siteService;
+    private int searchCount;
 
     @Autowired
     public SearchHandler(LemmaServiceImpl lemmaService,
@@ -43,8 +44,10 @@ public class SearchHandler {
     }
 
     public List<Lemma> findLemmasFromRequest(String text, WebSite webSite) {
+
         List<Lemma> lemmaList = new ArrayList<>();
         Set<String> strings = lemmaFinder.getLemmaSet(text);
+
         strings.forEach(lem -> {
             List<Lemma> lemmas = lemmaService.getLemmasByLemma(lem);
             if (webSite != null) {
@@ -59,24 +62,32 @@ public class SearchHandler {
         return lemmaList;
     }
 
-    public List<SearchData> searchData(WebSite webSite, String text) {
+    public List<SearchData> searchData(WebSite webSite, String text, int offset, int limit) {
+
         List<Lemma> lemmas = findLemmasFromRequest(text, webSite);
         Map<Page, Float> resultPages = new HashMap<>();
-        Map<Long, Map<Page, Float>> mapPages = new HashMap<>();
+        Map<Long, Float> resultPagesId = new HashMap<>();
+        Map<Long, Float> pagesIdMap = new HashMap<>();
+
+        List <Index> indexesOneLemma = indexService.getIndexesByLemmaId(lemmas.get(0).getId());
+        indexesOneLemma.forEach(index -> pagesIdMap.put(index.getPageId(), index.getRank()));
+
         for (Lemma lemma : lemmas) {
             List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
-            if (mapPages.isEmpty()) {
-                indexes.forEach(index -> {
-                    Page page = pageService.getPageById(index.getPageId());
-                    mapPages.put(index.getPageId(), Map.of(page, index.getRank()));
-                });
-            }
             indexes.forEach(index -> {
-                if (mapPages.containsKey(index.getPageId())) {
-                    resultPages.putAll(mapPages.get(index.getPageId()));
-                }
+                Long pageId = index.getPageId();
+                resultPagesId.put(pageId,  pagesIdMap.containsKey(pageId) ?
+                        pagesIdMap.get(pageId) + index.getRank() : index.getRank());
             });
         }
+        List<Long> pagesId = new ArrayList<>();
+        sortByValue(resultPagesId).forEach((key, value) -> pagesId.add(key));
+        setSearchCount(pagesId.size());
+
+        pagesId.subList(offset, Math.min(pagesId.size(), offset + limit))
+                .forEach(pageId -> resultPages.put(pageService
+                .getPageById(pageId), resultPagesId.get(pageId)));
+
         return !resultPages.isEmpty() ? createSearchData(resultPages, lemmas) : new ArrayList<>();
     }
 
@@ -93,9 +104,11 @@ public class SearchHandler {
     }
 
     public String buildSnippet(String html, List <Lemma> lemmas) {
+
         StringBuilder builder = new StringBuilder();
         StringBuilder buildSnippet = new StringBuilder();
         builder.append(Jsoup.parse(html).text());
+
         BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.ROOT);
         iterator.setText(builder.toString());
         int start = iterator.first();
@@ -109,7 +122,9 @@ public class SearchHandler {
     }
 
     public String substringSearch(String str, List <Lemma> lemmas) {
+
         StringBuilder result = new StringBuilder();
+
         for (Lemma lemma : lemmas) {
             StringBuilder text = new StringBuilder();
             String strLemma = lemma.getLemma();
@@ -138,7 +153,7 @@ public class SearchHandler {
         float maxValue = Collections.max(pages.entrySet(),
                 Comparator.comparingDouble(Map.Entry::getValue)).getValue();
         pages.forEach((key, value) -> pages.put(key, value / maxValue));
-        return sortByValue(pages);
+        return pages;
     }
 
     public <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map ) {
@@ -147,5 +162,13 @@ public class SearchHandler {
         stream.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .forEach(e -> result.put(e.getKey(),e.getValue()));
         return result;
+    }
+
+    public int getSearchCount() {
+        return searchCount;
+    }
+
+    public void setSearchCount(int searchCount) {
+        this.searchCount = searchCount;
     }
 }
