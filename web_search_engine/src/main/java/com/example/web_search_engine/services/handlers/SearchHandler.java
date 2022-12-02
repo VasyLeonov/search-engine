@@ -69,11 +69,11 @@ public class SearchHandler {
         Map<Long, Float> resultPagesId = new HashMap<>();
         Map<Long, Float> pagesIdMap = new HashMap<>();
 
-        List <Index> indexesOneLemma = indexService.getIndexesByLemmaId(lemmas.get(0).getId());
-        indexesOneLemma.forEach(index -> pagesIdMap.put(index.getPageId(), index.getRank()));
-
         for (Lemma lemma : lemmas) {
             List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
+            if (pagesIdMap.isEmpty()) {
+                indexes.forEach(index -> pagesIdMap.put(index.getPageId(), index.getRank()));
+            }
             indexes.forEach(index -> {
                 Long pageId = index.getPageId();
                 resultPagesId.put(pageId,  pagesIdMap.containsKey(pageId) ?
