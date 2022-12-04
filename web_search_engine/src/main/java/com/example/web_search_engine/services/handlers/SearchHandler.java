@@ -92,9 +92,11 @@ public class SearchHandler {
     }
 
     private List<SearchData> createSearchData(Map<Page, Float> pages, List<Lemma> lemmas) {
+        Set<String> strLemmas = new HashSet<>();
+        lemmas.forEach(lemma -> strLemmas.add(lemma.getLemma()));
         List<SearchData> result = new ArrayList<>();
         calculateRelevance(pages).forEach((key, value) -> {
-            String snippet = buildSnippet(key.getContent(), lemmas);
+            String snippet = buildSnippet(key.getContent(), strLemmas);
             WebSite site = siteService.getSiteById(key.getSiteId());
             result.add(new SearchData(site.getUrl(), site.getName(), key.getPath(),
                     Jsoup.parse(key.getContent()).title(),
@@ -103,50 +105,45 @@ public class SearchHandler {
         return result;
     }
 
-    public String buildSnippet(String html, List <Lemma> lemmas) {
+    public String buildSnippet(String html, Set<String> strLemmas) {
 
-        StringBuilder builder = new StringBuilder();
-        StringBuilder buildSnippet = new StringBuilder();
-        builder.append(Jsoup.parse(html).text());
+        String text = Jsoup.parse(html).text();
+        StringBuilder snippet = new StringBuilder();
 
         BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.ROOT);
-        iterator.setText(builder.toString());
+        iterator.setText(text);
         int start = iterator.first();
 
         for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
-             String str = builder.substring(start, end);
-             buildSnippet.append(substringSearch(str, lemmas));
+            String str = text.substring(start, end);
+            snippet.append(substringSearch(str, strLemmas));
         }
-        return buildSnippet.length() > 550 ? buildSnippet.substring(0, 550).concat("...")
-                : buildSnippet.toString();
+
+        return snippet.length() > 500 ? snippet.substring(0, 500).concat("...")
+                : snippet.toString();
     }
 
-    public String substringSearch(String str, List <Lemma> lemmas) {
+    public String substringSearch(String str, Set<String> lemmas) {
 
-        StringBuilder result = new StringBuilder();
+        String text = str;
 
-        for (Lemma lemma : lemmas) {
-            StringBuilder text = new StringBuilder();
-            String strLemma = lemma.getLemma();
-            if (str.toLowerCase(Locale.ROOT).contains(strLemma)) {
-                String replacement = "<b>".concat(strLemma).concat("</b>");
-                text.append(Pattern.compile(strLemma, Pattern.LITERAL |
-                         Pattern.CASE_INSENSITIVE |
-                         Pattern.UNICODE_CASE).matcher(str)
-                         .replaceAll(Matcher.quoteReplacement(replacement)));
-            }
-            int lastIndex = text.indexOf("<b>");
-            int nextIndex = text.indexOf("</b>");
-            if ((text.length() - nextIndex) > 50) {
-                text.delete(nextIndex + 50, text.length() - 1);
-                text.append("...");
-            }
-            if (lastIndex > 60) {
-                text.delete(0, lastIndex);
-            }
-            result.append(text.append(" "));
+        for (String strLemma : lemmas) {
+            String replacement = "<b>".concat(strLemma).concat("</b>");
+            text = Pattern.compile(strLemma, Pattern.LITERAL |
+                       Pattern.CASE_INSENSITIVE |
+                       Pattern.UNICODE_CASE).matcher(text)
+                       .replaceAll(Matcher.quoteReplacement(replacement));
         }
-        return result.toString();
+        int lastIndex = text.indexOf("<b>");
+        int nextIndex = text.indexOf("</b>");
+        if ((text.length() - nextIndex) > 50) {
+            text = text.substring(0, nextIndex + 50).concat("... ");
+        }
+        if (lastIndex > 50) {
+            text = text.substring(lastIndex - 50);
+            text = text.substring(text.indexOf(" "));
+        }
+        return text;
     }
 
     public Map<Page, Float> calculateRelevance(Map<Page, Float> pages) {

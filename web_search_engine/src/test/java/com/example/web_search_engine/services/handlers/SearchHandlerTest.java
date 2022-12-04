@@ -13,7 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Test for empty database
@@ -43,9 +45,8 @@ class SearchHandlerTest {
             "повышение", "финансовый", "условие", "равный", "актуальность", "существующий"};
 
 
-    private static final String EXPECTED_TEXT = "Равным образом постоянный <b>количественный</b> рост " +
-            "активности и сфера нашей активности Равным образом постоянный количественный <b>рост</b> " +
-            "активности и сфера нашей активности ";
+    private static final String EXPECTED_TEXT = "Равным образом постоянный <b>количественный</b>" +
+            " <b>рост</b> активности и сфера нашей активнос... ";
 
     private static final String TEXT_SHORT = "Равным образом постоянный количественный " +
             "рост активности и сфера нашей активности";
@@ -71,10 +72,12 @@ class SearchHandlerTest {
 
     @Test
     void substringSearch() {
+        Set<String> strLemmas = new HashSet<>();
         List<Lemma> lemmas = new ArrayList<>();
         lemmas.add(expectedLemmas.get(0));
         lemmas.add(expectedLemmas.get(1));
-        String actual = searchHandler.substringSearch(TEXT_SHORT, lemmas);
+        lemmas.forEach(lemma -> strLemmas.add(lemma.getLemma()));
+        String actual = searchHandler.substringSearch(TEXT_SHORT, strLemmas);
         Assertions.assertEquals(EXPECTED_TEXT, actual);
     }
 }
