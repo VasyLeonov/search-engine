@@ -69,11 +69,12 @@ public class SearchHandler {
         Map<Long, Float> resultPagesId = new HashMap<>();
         Map<Long, Float> pagesIdMap = new HashMap<>();
 
-        for (Lemma lemma : lemmas) {
-            List <Index> indexes = indexService.getIndexesByLemmaId(lemma.getId());
-            if (pagesIdMap.isEmpty()) {
-                indexes.forEach(index -> pagesIdMap.put(index.getPageId(), index.getRank()));
-            }
+        if (!lemmas.isEmpty()) {
+            List<Index> indexesByFirstLemma = indexService.getIndexesByLemmaId(lemmas.get(0).getId());
+            indexesByFirstLemma.forEach(index -> pagesIdMap.put(index.getPageId(), index.getRank()));
+        }
+        for (int i = 1; i < lemmas.size(); i++) {
+            List <Index> indexes = indexService.getIndexesByLemmaId(lemmas.get(i).getId());
             indexes.forEach(index -> {
                 Long pageId = index.getPageId();
                 resultPagesId.put(pageId,  pagesIdMap.containsKey(pageId) ?
@@ -130,9 +131,9 @@ public class SearchHandler {
         for (String strLemma : lemmas) {
             String replacement = "<b>".concat(strLemma).concat("</b>");
             text = Pattern.compile(strLemma, Pattern.LITERAL |
-                       Pattern.CASE_INSENSITIVE |
-                       Pattern.UNICODE_CASE).matcher(text)
-                       .replaceAll(Matcher.quoteReplacement(replacement));
+                     Pattern.CASE_INSENSITIVE |
+                     Pattern.UNICODE_CASE).matcher(text)
+                     .replaceAll(Matcher.quoteReplacement(replacement));
         }
         int lastIndex = text.indexOf("<b>");
         int nextIndex = text.indexOf("</b>");
