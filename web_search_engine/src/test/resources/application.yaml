@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    url: jdbc:mysql://localhost:3306/search_engine_test
+    password: rootroot
+  data:
+    jpa:
+      repositories:
+        enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+hibernate:
+  order_updates: true
+  jdbc:
+    batch_size: 1000
+  order_inserts: true
+
+config:
+  adminLogin: admin
+  adminPassword: 500500
+  webInterface: /admin
+  prefix: web
+  sites:
+    -
+      url: http://www.playback.ru
+      name: PlayBack.ru
+
+  userAgent: Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6

@@ -89,12 +89,11 @@ public class SearchHandler {
                 .forEach(pageId -> resultPages.put(pageService
                 .getPageById(pageId), resultPagesId.get(pageId)));
 
-        return !resultPages.isEmpty() ? createSearchData(resultPages, lemmas) : new ArrayList<>();
+        return !resultPages.isEmpty() ? createSearchData(resultPages, text) : new ArrayList<>();
     }
 
-    private List<SearchData> createSearchData(Map<Page, Float> pages, List<Lemma> lemmas) {
-        Set<String> strLemmas = new HashSet<>();
-        lemmas.forEach(lemma -> strLemmas.add(lemma.getLemma()));
+    private List<SearchData> createSearchData(Map<Page, Float> pages, String text) {
+        Set<String> strLemmas = lemmaFinder.getLemmaSet(text);
         List<SearchData> result = new ArrayList<>();
         calculateRelevance(pages).forEach((key, value) -> {
             String snippet = buildSnippet(key.getContent(), strLemmas);

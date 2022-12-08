@@ -14,10 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Locale;
 
-/**
- * Test for empty database
- */
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class SearchServiceImplTest {
@@ -48,10 +44,10 @@ class SearchServiceImplTest {
 
     @Test
     void searchContent() {
-        ResponseService actualOne = searchService.searchContent(QUERY, "SITE_URL", 0, 20);
-        ResponseService actualTwo = searchService.searchContent("", "SITE_URL", 0, 20);
+        ResponseService actualOne = searchService.searchContent(QUERY, "SITE_URL", 0, 10);
+        ResponseService actualTwo = searchService.searchContent("", "SITE_URL", 0, 10);
         Assert.assertEquals(expectedOne, actualOne);
         Assert.assertEquals(expectedTwo, actualTwo);
-        Mockito.verify(searchHandler, Mockito.times(1)).searchData(null, QUERY, 0, 0);
+        Mockito.verify(searchHandler, Mockito.times(1)).searchData(null, QUERY, 0, 10);
     }
 }

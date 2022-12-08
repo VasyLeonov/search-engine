@@ -15,9 +15,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Test for empty database
- */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class IndexHandlerTest {

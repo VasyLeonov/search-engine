@@ -17,9 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Test for empty database
- */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class SearchHandlerTest {
@@ -44,7 +41,6 @@ class SearchHandlerTest {
             "административный", "образ", "постоянный", "способствовать", "сфера", "нашить", "существовать",
             "повышение", "финансовый", "условие", "равный", "актуальность", "существующий"};
 
-
     private static final String EXPECTED_TEXT = "Равным образом постоянный <b>количественный</b>" +
             " <b>рост</b> активности и сфера нашей активнос... ";
 
@@ -55,12 +51,16 @@ class SearchHandlerTest {
     public void setUp() {
         webSite = null;
         expectedLemmas = new ArrayList<>();
+        long id = 0;
         for (String str : ARRAY_LEMMAS) {
+            id++;
             Lemma lemma = new Lemma();
+            lemma.setId(id);
             lemma.setLemma(str);
             lemma.setFrequency(1);
             lemma.setSiteId(1L);
-            expectedLemmas.add(lemmaService.putLemma(lemma));
+            lemmaService.putLemma(lemma);
+            expectedLemmas.add(lemma);
         }
     }
 
@@ -73,10 +73,8 @@ class SearchHandlerTest {
     @Test
     void substringSearch() {
         Set<String> strLemmas = new HashSet<>();
-        List<Lemma> lemmas = new ArrayList<>();
-        lemmas.add(expectedLemmas.get(0));
-        lemmas.add(expectedLemmas.get(1));
-        lemmas.forEach(lemma -> strLemmas.add(lemma.getLemma()));
+        strLemmas.add(expectedLemmas.get(0).getLemma());
+        strLemmas.add(expectedLemmas.get(1).getLemma());
         String actual = searchHandler.substringSearch(TEXT_SHORT, strLemmas);
         Assertions.assertEquals(EXPECTED_TEXT, actual);
     }
